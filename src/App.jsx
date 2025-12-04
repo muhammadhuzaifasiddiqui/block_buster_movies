@@ -1,0 +1,118 @@
+import React, { useEffect, useState } from "react";
+import Search from "./components/Search.jsx";
+
+const API_BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+
+const API_OPTIONS = {
+  method: "GET",
+  headers: {
+    accept: "application/json",
+    Authorization: `Bearer ${API_KEY}`,
+  },
+};
+
+const App = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [erroeMessage, setErrorMessage] = useState('');
+  const [movieList, setMovieList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  // const query = 'batman';
+
+  const fetchMovies = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+     
+    try {
+      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+      const response = await fetch(endpoint, API_OPTIONS);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
+      }
+
+      const data = await response.json();
+      if (data.Response === 'False') {
+        setErrorMessage(data.Error || 'Failed to fetch movies');
+        setMovieList([]);
+        return;
+      }
+      // alert(response);
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+      setErrorMessage("Failed to fetch movies. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
+  return (
+    <main>
+      <div className="pattern" />
+ 
+      <div className="wrapper">
+        <header className="header">
+          <img src="./hero.png" alt="Hero banner" />
+          <h1>
+            Find <span className="text-gradient">Movies</span>
+            You'll Enjoy without the Hassle
+          </h1>
+          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        </header>
+        <section className="all-movies">
+          <h2>All Movies</h2>
+          {erroeMessage && <p className="text-purple-400">{erroeMessage}</p>}
+        </section>
+        <h1 className="text-white">{searchTerm}</h1>
+      </div>
+    </main>
+  );
+};
+
+export default App;
+
+// import { useEffect, useState } from "react";
+
+// const hasLiked = true;
+
+// const Card = ({ title }) => {
+//   const [count, setCount] = useState(0);
+//   const [hasLiked, setHasLiked] = useState(5);
+
+//   useEffect(() => {
+//     console.log(`${title} has been liked: ${hasLiked}`);
+//   }, [hasLiked, title]);
+
+//   useEffect(() => {
+//     console.log('CARD RENDERED');
+//     // console.log(`${title} count is: ${count}`);
+//   }, []);
+
+//   return (
+//     // <div className="card" onClick={() => setCount((prevState) => prevState + 1)}>
+//     <div className="card" onClick={() => setCount(count + 1)}>
+//       <h2>{title} <br /> {count || null}</h2>
+
+//       <button onClick={() => setHasLiked(!hasLiked)}>
+//         {hasLiked ? '**' : '##'}
+//         {/* Like */}
+//       </button>
+//     </div>
+//   );
+// };
+
+// const App = () => {
+//   return (
+//     <div className="card-container">
+//       <Card title="Start Wars" rating={5} isCool={true} hasLiked={hasLiked} />
+//       <Card title="Avatar" />
+//       <Card title="The Lion King" />
+//     </div>
+//   );
+// };
+
+// export default App;
